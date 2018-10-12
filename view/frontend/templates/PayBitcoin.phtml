@@ -1,0 +1,151 @@
+<?php
+    $data = $block->getAllData();
+?>
+
+<script type="text/javascript">
+
+    require(['jquery'],function($){
+    apirone_query();
+    function apirone_query(){
+    $(".abf-refresh").addClass('rotating');
+    var key = '<?php echo $data['key'] ?>';
+    var order = <?php echo $data['order'] ?>;
+    if (key != undefined && order != undefined) {
+    abf_get_query='/apirone/payment/check/?key='+key+'&order='+order;
+    $.ajax({
+    url: abf_get_query,
+    dataType : "text",
+    success: function (data, textStatus) {
+       data = JSON.parse(data);
+       console.log(data);
+        if (data.status == "complete") {
+            complete = 1; 
+            $(".with-uncomfirmed, .uncomfirmed").empty();
+            statusText = "<?php echo __('Payment complete') ?>";
+        }
+        if (data.status == "innetwork") {
+            innetwork = 1;
+            complete = 0;
+            $(".with-uncomfirmed").text("(with uncomfirmed)");
+            statusText = "<?php echo __('Transaction in network (income amount') ?>: "+ data.innetwork_amount +" BTC)";
+        }
+        if (data.status == "waiting") {
+            complete = 0;
+            $(".with-uncomfirmed, .uncomfirmed").empty();
+            statusText = "<?php echo __('Waiting payment') ?>";
+        }
+
+        $(".abf-tx").empty();
+        if(!data.transactions) {
+            $(".abf-tx").prepend('<?php echo __('No TX yet') ?>');
+        } else{
+            data.transactions.forEach(showTransactions);
+        }
+
+        input_address = $('.abf-input-address').html(); 
+        encoded_msg = encodeURIComponent("bitcoin:" + input_address + "?amount=" + data.remains_to_pay + "&label=Apirone");
+        src = 'https://apirone.com/api/v1/qr?message=' + encoded_msg;
+        $('.abf-img-height').hide();
+        $('.abf-img-height').attr('src', src);
+        $('.abf-img-height').show();
+
+        function showTransactions(value, index, ar) {
+            if(value.confirmations >= data.count_confirmations) {
+                color='abf-green';
+            } else if(value.confirmations > 0 && value.confirmations < data.count_confirmations) {
+                color='abf-yellow';
+            } else{
+                color='abf-red';
+            };
+            tx = '<div><a href="https://apirone.com/btc/tx/' + value.input_thash + '" target="_blank">'+ value.input_thash.substr(0,8)+ '...' + value.input_thash.substr(-8) + '</a><div class="abf-confirmations ' + color + '" title="<?php echo __('Confirmations count') ?>">' + value.confirmations + '</div></div>';
+            $(".abf-tx").prepend(tx);
+        }
+        $( ".abf-totalbtc" ).text(data.total_btc);
+        $( ".abf-arrived" ).text(data.arrived_amount);
+
+        remains = parseFloat(data.remains_to_pay);
+        remains = remains.toFixed(8);
+        if( remains < 0 ) remains = 0;
+        $( ".abf-remains" ).text(remains);
+        $( ".abf-status" ).text(statusText);
+        complete_block = '<div class="abf-complete"><p><?php echo __('Thank You! Payment done. Order finished.') ?></p></div>';
+ 
+        if (!$("div").is(".abf-complete") && complete){ $( ".abf-data" ).after(complete_block); }
+        $(".abf-refresh").removeClass('rotating');
+        
+    } ,
+    error: function(xhr, ajaxOptions, thrownError){
+      $( ".apirone_result" ).html( '<h4><?php echo __('Waiting payment') ?>...</h4>' );
+    }
+    });
+    }
+    }
+    setInterval(apirone_query, 7000);
+    $( document ).ready(function() {
+    $(".abf-refresh").click(function(event) {
+        $(".abf-refresh").addClass('rotating');
+        apirone_query();
+    });
+});
+});
+</script>
+<div class="abf-frame">
+        <div class="abf-header">
+            <div>
+                <div class="abf-ash1"><img src="<?php echo $block->getViewFileUrl('Apirone_Merchant::images/apirone_bitcoin_logo.svg'); ?>" alt=""></div>
+            </div>
+            <div style="text-align: center; background-color:#fff;"><span class="abf-qr">
+               <img class="abf-img-height" src="https://apirone.com/api/v1/qr?message=<?php echo $data['message'] ?>">
+               </span>
+            </div> 
+        </div>
+        <div class="abf-form">
+            <div class="abf-ash1">
+                <?php echo __('Please send') ?> <strong><span class="abf-totalbtc"><?php echo $data['response_btc'] ?></span></strong> BTC
+                <?php echo __('to address') ?>:
+            </div>
+            <div class="abf-address abf-topline abf-ash2 abf-input-address"><?php echo $data['input_address'] ?></div>
+            <div class="abf-data abf-topline">
+                <div class="abf-list">
+                    <div class="abf-list-item">
+                        <div class="abf-label"><?php echo __('Merchant') ?>:</div>
+                        <div class="abf-value"><?php echo $data['merchantname'] ?></div>
+                    </div>
+                    <div class="abf-list-item">
+                        <div class="abf-label"><?php echo __('Amount to pay') ?>:</div>
+                        <div class="abf-value"><span class="abf-totalbtc"><?php echo $data['response_btc'] ?></span> BTC</div>
+                    </div>
+                    <div class="abf-list-item">
+                        <div class="abf-label"><?php echo __('Arrived amount') ?>:</div>
+                        <div class="abf-value"><span class="abf-arrived">0.00000000</span> BTC</div>
+                    </div>
+                    <div class="abf-list-item">
+                        <div class="abf-label"><?php echo __('Remains to pay') ?>:</div>
+                        <div class="abf-value"><b><span class="abf-remains"><?php echo $data['response_btc'] ?></span> BTC</b></div>
+                    </div>                                                           
+                    <div class="abf-list-item">
+                        <div class="abf-label"><?php echo __('Date') ?>:</div>
+                        <div class="abf-value"><?php echo $data['current_date'] ?></div>
+                    </div>
+                    <div class="abf-list-item abf-tx-block">
+                        <div class="abf-label"><?php echo __('Transaction(s)') ?>:</div>
+                        <div class="abf-value abf-tx">
+                            <?php echo __('No TX yet') ?>
+                        </div>
+                    </div>
+                    <div class="abf-list-item">
+                        <div class="abf-label"><?php echo __('Status') ?>:</div>
+                        <div class="abf-value"><b><span class="abf-status"><?php echo __('Loading data') ?></span></b><div class="abf-refresh"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="abf-info">
+                <p><?php echo __('If you are unable to complete your payment, you can try again later to place a new order with saved cart.') ?><br><?php echo __('You can pay partially, but please do not close this window before your next payment to prevent loss of bitcoin address and invoice number.') ?>
+                </p>
+                <p class="abf-left"><a href="<?php echo $data['back_to_cart'] ?>"><?php echo __('Back to cart') ?></a></p>
+                <p class="abf-right"><a href="https://apirone.com/" target="_blank"><img width="82" src="<?php echo $block->getViewFileUrl('Apirone_Merchant::images/apirone_logo.svg'); ?>"  alt=""></a></p>
+                <div class="abf-clear"></div>
+            </div>
+        </div>
+    </div>
+    <div class="abf-clear"></div>

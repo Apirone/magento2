@@ -1,0 +1,15 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <apirone_merchant>
+                    <active>0</active>
+                    <model>Apirone\Merchant\Model\Payment</model>
+                    <title>Bitcoin via Apirone</title>
+                    <order_status_new>new</order_status_new>
+                    <order_status_pending>pending_payment</order_status_pending>
+                    <order_status_complete>complete</order_status_complete>
+                    <confirmations_count>2</confirmations_count>
+            </apirone_merchant>
+        </payment>
+    </default>
+</config>

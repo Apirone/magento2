@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="empty" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceContainer name="page.wrapper" remove="true"/>
+    <head>
+        <title>Pay with Bitcoin</title>
+        <css src="Apirone_Merchant::css/apirone.css" />
+    </head>
+    <body>
+        <referenceContainer name="root">
+            <block class="Apirone\Merchant\Block\PayBitcoin"
+                   name="PayBitcoin.view"
+                   template="Apirone_Merchant::PayBitcoin.phtml"
+                   cacheable="false" />
+        </referenceContainer>
+      </body>
+</page>

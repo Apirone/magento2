@@ -1,0 +1,36 @@
+{
+  "name": "apirone/bitcoin-plugin",
+  "description": "Magento 2 Bitcoin plugin via Apirone",
+  "version": "1.0.0",
+  "keywords": [
+	"bitcoin",
+	"magento",
+	"merchant",
+	"payment",
+	"btc",
+	"cryptocurrency"
+  ],
+  "type": "magento2-module",
+  "version": "1.0.0",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "authors": [
+    {
+      "name": "Apirone.com",
+      "email": "support@apirone.com",
+      "role": "Integrations Team",
+      "homepage": "https://apirone.com/integrations/magento2"
+    }
+  ],
+  "require": {
+    "php": "~5.5.0|~5.6.0|~7.0.0"
+  },
+  "autoload": {
+    "files": [ "registration.php" ],
+    "psr-4": {
+      "Apirone\\Merchant\\": ""
+    }
+  }
+}
