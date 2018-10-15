@@ -90,7 +90,7 @@ class Check extends Action
             $confirmed = '';
             $status = 'waiting';
             //print_r($sales);
-            $alltransactions = '';
+            $alltransactions = array();
             if($transactions != '')
             foreach ($transactions as $transaction) {
                 if($transaction['thash'] == 'empty') {
