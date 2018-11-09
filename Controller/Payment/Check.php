@@ -37,7 +37,7 @@ class Check extends Action
         OrderFactory $orderFactory,
         ScopeConfigInterface $scopeConfig
     ) {
-        parent::__construct($context,$scopeConfig);
+        parent::__construct($context);
         $this->ApironePayment = $ApironePayment;
         $this->orderFactory = $orderFactory;
         $this->scopeConfig = $scopeConfig;
@@ -90,8 +90,9 @@ class Check extends Action
             $confirmed = '';
             $status = 'waiting';
             //print_r($sales);
-            $alltransactions = array();
-            if($transactions != '')
+            //print_r($transactions);
+            if($transactions != array()) {
+                $alltransactions = array();
             foreach ($transactions as $transaction) {
                 if($transaction['thash'] == 'empty') {
                             $status = 'innetwork';
@@ -110,9 +111,12 @@ class Check extends Action
                 }
                 $alltransactions[] = array('thash' => $transaction['thash'], 'input_thash' => $transaction['input_thash'], 'confirmations' => $transaction['confirmations']);             
             }
+            } else {
+                $alltransactions = "";
+            }
             if ($order == '') {
-                echo '';
-                exit;
+                $this->getResponse()->setBody('');
+                return;
             }
 
             $response_btc = $this->ApironePayment->abf_convert_to_btc($order['currency_code'], $order['total'], 1);
